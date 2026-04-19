@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ParkQR | Pay & Park - Smart Parking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* COLOR THEME: #fff6ED, #D2A679, #8B5C3B, #2E1A0F */
+        body {
+            background: #fff6ED;
+            font-family: 'Inter', sans-serif;
+            padding: 1.2rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-card {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: #fffef8;
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(46, 26, 15, 0.15), 0 4px 12px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(210, 166, 121, 0.25);
+        }
+
+        .header {
+            padding: 1.4rem 1.8rem 1rem 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            background: #fffef8;
+            border-bottom: 1px solid #f0e4d8;
+        }
+
+        .logo {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #8B5C3B, #D2A679);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: #D2A679;
+            font-size: 1.5rem;
+        }
+
+        .demo-badge {
+            background: rgba(210, 166, 121, 0.12);
+            border: 1px solid rgba(210, 166, 121, 0.35);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #8B5C3B;
+        }
+
+        .role-toggle {
+            background: #fff0e6;
+            margin: 1.2rem 1.8rem 0 1.8rem;
+            border-radius: 60px;
+            display: flex;
+            padding: 0.35rem;
+            gap: 0.4rem;
+            box-shadow: inset 0 1px 2px rgba(46, 26, 15, 0.05), 0 1px 2px white;
+        }
+
+        .role-btn {
+            flex: 1;
+            text-align: center;
+            padding: 0.65rem 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            color: #a88665;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .role-btn i { font-size: 0.85rem; }
+        .role-btn.active {
+            background: white;
+            color: #8B5C3B;
+            box-shadow: 0 4px 12px rgba(139, 92, 59, 0.1);
+            font-weight: 700;
+        }
+
+        .action-grid {
+            display: flex;
+            gap: 0.9rem;
+            margin: 1.6rem 1.8rem 1.4rem 1.8rem;
+        }
+
+        .action-item {
+            flex: 1;
+            background: #fffbf5;
+            border-radius: 1.8rem;
+            padding: 0.9rem 0.2rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #f0e2d4;
+        }
+
+        .action-item.active-tab {
+            background: white;
+            border-color: #D2A679;
+            box-shadow: 0 8px 18px -6px rgba(210, 166, 121, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .action-icon { font-size: 1.7rem; margin-bottom: 0.2rem; color: #b88b62; }
+        .action-label { font-weight: 600; font-size: 0.8rem; color: #7a5a43; }
+
+        .main-panel { padding: 0 1.8rem 2rem 1.8rem; }
+
+        .welcome-message {
+            background: #fff5ec;
+            border-radius: 1.5rem;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1.4rem;
+            font-weight: 500;
+            color: #8B5C3B;
+            border-left: 5px solid #D2A679;
+            font-size: 0.9rem;
+        }
+
+        .vehicle-form, .payment-form {
+            background: white;
+            border-radius: 1.8rem;
+            padding: 1.3rem;
+            box-shadow: 0 4px 14px rgba(46, 26, 15, 0.04);
+            border: 1px solid #f0e4d8;
+        }
+
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #a88665;
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.3px;
+        }
+
+        .vehicle-input, .payment-input {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.95rem;
+            border: 1.5px solid #f0e2d4;
+            border-radius: 1.5rem;
+            font-family: 'Inter', monospace;
+            font-weight: 500;
+            transition: 0.2s;
+            background: #ffffff;
+        }
+
+        .vehicle-input:focus, .payment-input:focus {
+            outline: none;
+            border-color: #D2A679;
+            box-shadow: 0 0 0 3px rgba(210, 166, 121, 0.2);
+        }
+
+        .qr-button {
+            background: linear-gradient(105deg, #D2A679, #b8865a);
+            width: 100%;
+            border: none;
+            padding: 0.9rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 1.8rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(139, 92, 59, 0.2);
+        }
+
+        .qr-button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+            box-shadow: 0 6px 14px rgba(139, 92, 59, 0.25);
+        }
+
+        .exit-button {
+            background: linear-gradient(105deg, #b07d58, #9a6843);
+            margin-top: 10px;
+        }
+
+        .price-display {
+            background: #fff5ec;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #8B5C3B;
+            border: 1px solid #f0e2d4;
+        }
+
+        .price-display small {
+            font-size: 0.7rem;
+            font-weight: normal;
+            color: #a88665;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            justify-content: center;
+        }
+
+        .payment-method {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem;
+            border: 1.5px solid #f0e2d4;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .payment-method.selected {
+            border-color: #D2A679;
+            background: #fff5ec;
+            box-shadow: 0 2px 8px rgba(210, 166, 121, 0.2);
+        }
+
+        .payment-method i {
+            font-size: 1.5rem;
+            color: #8B5C3B;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .payment-method span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #7a5a43;
+        }
+
+        .qr-card {
+            margin-top: 1.5rem;
+            background: #fffaf3;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #f5e2ce;
+            animation: fadeSlide 0.3s ease;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .qr-container {
+            background: white;
+            padding: 12px;
+            border-radius: 1.2rem;
+            margin: 0.6rem auto;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(46, 26, 15, 0.06);
+        }
+
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .small-note {
+            font-size: 0.65rem;
+            color: #b48b67;
+            margin-top: 0.5rem;
+        }
+
+        .history-list {
+            background: #fffbf7;
+            border-radius: 1.4rem;
+            padding: 0.6rem;
+            border: 1px solid #f0e4d8;
+        }
+
+        .history-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid #f5e8dc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .badge-status {
+            background: #f2e4d8;
+            color: #8B5C3B;
+            border-radius: 30px;
+            padding: 0.25rem 0.9rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .badge-active { background: #fae6d4; color: #c47a42; }
+        .empty-msg { text-align: center; padding: 1.5rem; color: #c6a182; font-size: 0.85rem;}
+        .admin-view { background: #fffaf5; border-radius: 1.5rem; padding: 0.9rem; border: 1px solid #f0e4d8; }
+        hr { margin: 0.8rem 0; border-color: #f0e2d4; }
+        .delete-reserve {
+            background: none;
+            border: none;
+            color: #c6865e;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+        .delete-reserve:hover { background: #f5e6db; }
+
+        @media (max-width: 500px) {
+            .action-grid { gap: 0.6rem; margin-left: 1rem; margin-right: 1rem; }
+            .main-panel { padding: 0 1rem 1.5rem 1rem; }
+            .role-toggle { margin-left: 1rem; margin-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-card" id="parkApp"></div>
+
+<script>
+    // ==================== PARKQR WITH PAYMENT PAGE BEFORE QR ====================
+    let parkingSessions = [];
+    let reservations = [];
+    let paymentPending = null; // Stores pending payment { vehicleNumber, amount, duration }
+
+    const HOURLY_RATE = 40; // ₹40 per hour
+    const MIN_AMOUNT = 40;
+
+    function uid() { return Date.now() + '-' + Math.random().toString(36).substr(2, 8); }
+
+    function saveToLocal() {
+        localStorage.setItem('parkqr_sessions_pay', JSON.stringify(parkingSessions));
+        localStorage.setItem('parkqr_reservations_pay', JSON.stringify(reservations));
+    }
+
+    function initData() {
+        const storedSessions = localStorage.getItem('parkqr_sessions_pay');
+        const storedReservations = localStorage.getItem('parkqr_reservations_pay');
+        if (storedSessions && storedReservations) {
+            parkingSessions = JSON.parse(storedSessions);
+            reservations = JSON.parse(storedReservations);
+        } else {
+            parkingSessions = [
+                { id: uid(), vehicleNumber: 'ABC-1234', entryTime: '2026-04-09 08:15 AM', status: 'active', qrData: 'PARK:ABC-1234:2026-04-09', exitTime: null, paid: true, amount: 120 },
+                { id: uid(), vehicleNumber: 'XYZ-9876', entryTime: '2026-04-08 06:30 PM', status: 'completed', qrData: 'PARK:XYZ-9876:2026-04-08', exitTime: '2026-04-08 09:15 PM', paid: true, amount: 100 }
+            ];
+            reservations = [
+                { id: uid(), vehicleNumber: 'DEF-5678', reserveTime: '2026-04-10 10:30 AM', slot: 'EV Premium', status: 'upcoming' },
+                { id: uid(), vehicleNumber: 'GHI-1122', reserveTime: '2026-04-11 02:00 PM', slot: 'VIP Garden', status: 'upcoming' }
+            ];
+            saveToLocal();
+        }
+    }
+
+    function calculateAmount(durationHours) {
+        let hours = Math.ceil(durationHours);
+        if (hours < 1) hours = 1;
+        return hours * HOURLY_RATE;
+    }
+
+    function startParking(vehicleNumber, amount) {
+        if (!vehicleNumber || vehicleNumber.trim() === "") return { success: false, msg: "✨ Please enter vehicle number" };
+        const upperVehicle = vehicleNumber.trim().toUpperCase();
+        const alreadyActive = parkingSessions.find(s => s.status === 'active' && s.vehicleNumber === upperVehicle);
+        if (alreadyActive) return { success: false, msg: `🚗 ${upperVehicle} is already parked!` };
+        
+        const qrContent = `PARKQR:${upperVehicle}:${Date.now()}:${Math.random().toString(36).substring(2, 10)}:PAID:${amount}`;
+        const newSession = {
+            id: uid(),
+            vehicleNumber: upperVehicle,
+            entryTime: new Date().toLocaleString(),
+            status: 'active',
+            qrData: qrContent,
+            exitTime: null,
+            paid: true,
+            amount: amount
+        };
+        parkingSessions.push(newSession);
+        saveToLocal();
+        return { success: true, session: newSession, msg: `✅ Payment successful! Parking started for ${upperVehicle}` };
+    }
+
+    function exitParking(vehicleNumber) {
+        const upperVehicle = vehicleNumber.trim().toUpperCase();
+        const activeIndex = parkingSessions.findIndex(s => s.status === 'active' && s.vehicleNumber === upperVehicle);
+        if (activeIndex === -1) return { success: false, msg: `🔍 No active session for ${upperVehicle}` };
+        parkingSessions[activeIndex].status = 'completed';
+        parkingSessions[activeIndex].exitTime = new Date().toLocaleString();
+        saveToLocal();
+        return { success: true, msg: `🏁 ${upperVehicle} exited. Have a great day!` };
+    }
+
+    function createReservation(vehicleNumber, slot = "Standard Spot") {
+        if (!vehicleNumber || vehicleNumber.trim() === "") return { success: false, msg: "📝 Enter vehicle number" };
+        const upperVehicle = vehicleNumber.trim().toUpperCase();
+        const alreadyReserved = reservations.find(r => r.vehicleNumber === upperVehicle && r.status === 'upcoming');
+        if (alreadyReserved) return { success: false, msg: `📌 ${upperVehicle} already has a reservation` };
+        const newRes = {
+            id: uid(),
+            vehicleNumber: upperVehicle,
+            reserveTime: new Date().toLocaleString(),
+            slot: slot.trim() || "Standard Spot",
+            status: 'upcoming'
+        };
+        reservations.push(newRes);
+        saveToLocal();
+        return { success: true, reservation: newRes, msg: `🎉 Reservation created for ${upperVehicle}` };
+    }
+
+    function cancelReservation(reservationId) {
+        const idx = reservations.findIndex(r => r.id === reservationId);
+        if (idx !== -1) { reservations.splice(idx, 1); saveToLocal(); return true; }
+        return false;
+    }
+
+    function getUserHistory(vehicleNumber) {
+        const upper = vehicleNumber.trim().toUpperCase();
+        return { 
+            sessions: parkingSessions.filter(s => s.vehicleNumber === upper),
+            reservations: reservations.filter(r => r.vehicleNumber === upper)
+        };
+    }
+
+    function getAllAdminData() {
+        return { sessions: [...parkingSessions], reservations: [...reservations] };
+    }
+
+    function generateQRCode(elementId, qrText) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+        container.innerHTML = '';
+        try {
+            new QRCode(container, {
+                text: qrText,
+                width: 140,
+                height: 140,
+                colorDark: "#8B5C3B",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } catch(e) {
+            container.innerHTML = `<div style="padding:15px; color:#d2a679;">⚡ QR preview</div>`;
+        }
+    }
+
+    let currentRole = 'user';
+    let currentTab = 'park';
+    let userInputVehicle = 'ABC-1234';
+    let showPaymentPage = false;
+    let pendingVehicle = '';
+    let pendingDuration = 1;
+    let pendingAmount = 40;
+    let selectedPaymentMethod = 'card';
+    const appContainer = document.getElementById('parkApp');
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function processPayment(vehicle, amount, method) {
+        // Simulate payment processing
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({ success: true, transactionId: 'TXN' + Math.random().toString(36).substr(2, 8).toUpperCase() });
+            }, 800);
+        });
+    }
+
+    function renderFullApp() {
+        const roleHtml = `
+            <div class="role-toggle" id="roleToggle">
+                <button class="role-btn ${currentRole === 'user' ? 'active' : ''}" data-role="user"><i class="fas fa-user-astronaut"></i> User</button>
+                <button class="role-btn ${currentRole === 'admin' ? 'active' : ''}" data-role="admin"><i class="fas fa-crown"></i> Admin</button>
+            </div>
+            <div class="action-grid" id="actionTabs">
+                <div class="action-item ${currentTab === 'park' ? 'active-tab' : ''}" data-tab="park"><div class="action-icon"><i class="fas fa-parking"></i></div><div class="action-label">Park</div></div>
+                <div class="action-item ${currentTab === 'reserve' ? 'active-tab' : ''}" data-tab="reserve"><div class="action-icon"><i class="fas fa-calendar-week"></i></div><div class="action-label">Reserve</div></div>
+                <div class="action-item ${currentTab === 'history' ? 'active-tab' : ''}" data-tab="history"><div class="action-icon"><i class="fas fa-timeline"></i></div><div class="action-label">History</div></div>
+            </div>
+            <div class="main-panel" id="dynamicContent"></div>
+        `;
+        appContainer.innerHTML = `<div class="header"><div class="logo"><i class="fas fa-qrcode"></i> ParkQR</div><span class="demo-badge"><i class="fas fa-credit-card"></i> PAY & PARK</span></div>${roleHtml}`;
+        const dynamicPanel = document.getElementById('dynamicContent');
+        if (currentRole === 'user') renderUserPanel(dynamicPanel);
+        else renderAdminPanel(dynamicPanel);
+
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const newRole = btn.getAttribute('data-role');
+                if (newRole === 'user') currentRole = 'user';
+                else currentRole = 'admin';
+                showPaymentPage = false;
+                renderFullApp();
+            });
+        });
+        document.querySelectorAll('.action-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabVal = tab.getAttribute('data-tab');
+                if (tabVal) { currentTab = tabVal; showPaymentPage = false; renderFullApp(); }
+            });
+        });
+    }
+
+    // ========== USER PANEL WITH PAYMENT PAGE ==========
+    function renderUserPanel(container) {
+        if (currentTab === 'park') {
+            const activeSession = parkingSessions.find(s => s.status === 'active' && s.vehicleNumber === userInputVehicle.toUpperCase());
+            
+            // If payment page is active, show payment UI
+            if (showPaymentPage && pendingVehicle) {
+                renderPaymentPage(container);
+                return;
+            }
+            
+            // Normal park view
+            container.innerHTML = `
+                <div class="welcome-message"><i class="fas fa-tree"></i> Pay before you park · Secure online payment</div>
+                <div class="vehicle-form">
+                    <div class="input-group"><label><i class="fas fa-id-card"></i> VEHICLE NUMBER</label><input type="text" class="vehicle-input" id="userVehicleInput" placeholder="ABC-1234" value="${escapeHtml(userInputVehicle)}"></div>
+                    
+                    <div class="input-group"><label><i class="fas fa-clock"></i> PARKING DURATION</label>
+                        <select class="vehicle-input" id="durationSelect">
+                            <option value="1">1 hour - ₹40</option>
+                            <option value="2">2 hours - ₹80</option>
+                            <option value="3">3 hours - ₹120</option>
+                            <option value="4">4 hours - ₹160</option>
+                            <option value="6">6 hours - ₹240</option>
+                            <option value="8">8 hours - ₹320</option>
+                            <option value="12">12 hours - ₹480</option>
+                            <option value="24">24 hours - ₹960</option>
+                        </select>
+                    </div>
+                    
+                    <button class="qr-button" id="proceedPaymentBtn"><i class="fas fa-credit-card"></i> Proceed to Payment</button>
+                    <div id="parkMessageArea" style="margin-top: 8px;"></div>
+                    ${activeSession ? `<button class="qr-button exit-button" id="exitParkBtn"><i class="fas fa-sign-out-alt"></i> Exit Parking</button>` : ''}
+                    <div id="qrDisplayArea"></div>
+                </div>
+            `;
+            
+            const inputV = document.getElementById('userVehicleInput');
+            const durationSelect = document.getElementById('durationSelect');
+            const proceedBtn = document.getElementById('proceedPaymentBtn');
+            const exitBtn = document.getElementById('exitParkBtn');
+            
+            if (activeSession) {
+                const qrDisplay = document.getElementById('qrDisplayArea');
+                if (qrDisplay) {
+                    qrDisplay.innerHTML = `
+                        <div class="qr-card">
+                            <div><i class="fas fa-check-circle" style="color:#D2A679;"></i> <strong>Active session</strong></div>
+                            <div><i class="fas fa-car"></i> ${activeSession.vehicleNumber}</div>
+                            <div><i class="far fa-clock"></i> ${activeSession.entryTime}</div>
+                            <div><i class="fas fa-rupee-sign"></i> Paid: ₹${activeSession.amount}</div>
+                            <div class="qr-container"><div id="activeQR" class="qr-placeholder"></div></div>
+                            <div class="small-note"><i class="fas fa-mobile-alt"></i> Scan this QR at exit gate</div>
+                        </div>
+                    `;
+                    setTimeout(() => generateQRCode('activeQR', activeSession.qrData), 60);
+                }
+            }
+            
+            if (inputV) inputV.addEventListener('input', (e) => { userInputVehicle = e.target.value; });
+            if (proceedBtn) {
+                proceedBtn.addEventListener('click', () => {
+                    const vehicle = inputV ? inputV.value : userInputVehicle;
+                    if (!vehicle.trim()) {
+                        document.getElementById('parkMessageArea').innerHTML = `<div style="color:#c6865e;">⚠️ Enter vehicle number</div>`;
+                        return;
+                    }
+                    const alreadyActive = parkingSessions.find(s => s.status === 'active' && s.vehicleNumber === vehicle.toUpperCase());
+                    if (alreadyActive) {
+                        document.getElementById('parkMessageArea').innerHTML = `<div style="color:#c6865e;">🚗 ${vehicle} is already parked!</div>`;
+                        return;
+                    }
+                    const duration = parseInt(durationSelect.value);
+                    const amount = duration * HOURLY_RATE;
+                    pendingVehicle = vehicle.trim().toUpperCase();
+                    pendingDuration = duration;
+                    pendingAmount = amount;
+                    showPaymentPage = true;
+                    renderFullApp();
+                });
+            }
+            if (exitBtn) {
+                exitBtn.addEventListener('click', () => {
+                    const vehicle = inputV ? inputV.value : userInputVehicle;
+                    const exitRes = exitParking(vehicle);
+                    const msgDiv = document.getElementById('parkMessageArea');
+                    if (exitRes.success) {
+                        msgDiv.innerHTML = `<div style="color:#8B5C3B;">🏁 ${exitRes.msg}</div>`;
+                        renderFullApp();
+                    } else {
+                        msgDiv.innerHTML = `<div style="color:#c6865e;">❌ ${exitRes.msg}</div>`;
+                    }
+                });
+            }
+        } 
+        else if (currentTab === 'reserve') {
+            const userReservations = reservations.filter(r => r.vehicleNumber === userInputVehicle.toUpperCase() && r.status === 'upcoming');
+            container.innerHTML = `
+                <div class="welcome-message"><i class="fas fa-calendar-alt"></i> Reserve your spot in seconds</div>
+                <div class="vehicle-form">
+                    <div class="input-group"><label><i class="fas fa-tag"></i> VEHICLE NUMBER</label><input type="text" id="reserveVehicle" class="vehicle-input" value="${escapeHtml(userInputVehicle)}"></div>
+                    <div class="input-group"><label><i class="fas fa-map-pin"></i> SLOT (optional)</label><input type="text" id="reserveSlot" class="vehicle-input" placeholder="EV, VIP, Covered..."></div>
+                    <button class="qr-button" id="createReserveBtn"><i class="fas fa-plus-circle"></i> Create Reservation</button>
+                    <div id="reserveMsg"></div>
+                </div>
+                <div class="history-list" style="margin-top:1rem;">
+                    <div style="font-weight:600; margin-bottom: 0.5rem;"><i class="fas fa-ticket-alt"></i> Upcoming reservations</div>
+                    <div id="userReserveList"></div>
+                </div>
+            `;
+            const reserveVehicle = document.getElementById('reserveVehicle');
+            const reserveSlot = document.getElementById('reserveSlot');
+            const createBtn = document.getElementById('createReserveBtn');
+            const refreshList = () => {
+                const currentVehicle = reserveVehicle?.value || userInputVehicle;
+                const list = reservations.filter(r => r.vehicleNumber === currentVehicle.toUpperCase() && r.status === 'upcoming');
+                const listDiv = document.getElementById('userReserveList');
+                if (listDiv) {
+                    if (list.length === 0) listDiv.innerHTML = '<div class="empty-msg"><i class="far fa-calendar-times"></i> No active reservations</div>';
+                    else {
+                        listDiv.innerHTML = list.map(r => `
+                            <div class="history-item">
+                                <div><i class="fas fa-car-side"></i> <strong>${escapeHtml(r.vehicleNumber)}</strong><br><span style="font-size:0.7rem;">${escapeHtml(r.reserveTime)}</span><br><span class="badge-status">${escapeHtml(r.slot)}</span></div>
+                                <button class="delete-reserve" data-id="${r.id}"><i class="fas fa-trash-alt"></i> Cancel</button>
+                            </div>
+                        `).join('');
+                        document.querySelectorAll('.delete-reserve').forEach(btn => {
+                            btn.addEventListener('click', () => { const id = btn.getAttribute('data-id'); if(id && cancelReservation(id)) renderFullApp(); });
+                        });
+                    }
+                }
+            };
+            if (createBtn) {
+                createBtn.addEventListener('click', () => {
+                    const vehicle = reserveVehicle?.value.trim() || userInputVehicle;
+                    const slot = reserveSlot?.value.trim() || "Standard Spot";
+                    const result = createReservation(vehicle, slot);
+                    const msgDiv = document.getElementById('reserveMsg');
+                    if (result.success) { msgDiv.innerHTML = `<div style="color:#8B5C3B;">🎉 ${result.msg}</div>`; if(reserveSlot) reserveSlot.value = ''; renderFullApp(); }
+                    else msgDiv.innerHTML = `<div style="color:#c6865e;">⚠️ ${result.msg}</div>`;
+                });
+            }
+            if (reserveVehicle) reserveVehicle.addEventListener('input', () => refreshList());
+            refreshList();
+        }
+        else if (currentTab === 'history') {
+            const history = getUserHistory(userInputVehicle);
+            container.innerHTML = `
+                <div class="welcome-message"><i class="fas fa-scroll"></i> Timeline for ${escapeHtml(userInputVehicle)}</div>
+                <div class="input-group"><label><i class="fas fa-search"></i> Change vehicle</label><input type="text" id="historyVehicleInput" class="vehicle-input" value="${escapeHtml(userInputVehicle)}"></div>
+                <div class="history-list"><div style="font-weight:600;"><i class="fas fa-parking"></i> Parking sessions</div>
+                    ${history.sessions.length === 0 ? '<div class="empty-msg">📭 No parking records</div>' : history.sessions.map(s => `<div class="history-item"><div><strong>${escapeHtml(s.vehicleNumber)}</strong><br>${escapeHtml(s.entryTime)}<br><span class="badge-status">Paid: ₹${s.amount || 40}</span></div><span class="badge-status ${s.status === 'active' ? 'badge-active' : ''}">${s.status.toUpperCase()}</span></div>`).join('')}
+                </div>
+                <div class="history-list" style="margin-top:1rem;"><div style="font-weight:600;"><i class="fas fa-bookmark"></i> Reservations</div>
+                    ${history.reservations.length === 0 ? '<div class="empty-msg">📭 No reservations</div>' : history.reservations.map(r => `<div class="history-item"><div><strong>${escapeHtml(r.vehicleNumber)}</strong><br>${escapeHtml(r.reserveTime)}<br><span class="badge-status">${escapeHtml(r.slot)}</span></div><span class="badge-status">upcoming</span></div>`).join('')}
+                </div>
+            `;
+            const histInput = document.getElementById('historyVehicleInput');
+            if (histInput) histInput.addEventListener('input', (e) => { userInputVehicle = e.target.value; renderFullApp(); });
+        }
+    }
+
+    function renderPaymentPage(container) {
+        container.innerHTML = `
+            <div class="welcome-message"><i class="fas fa-credit-card"></i> Complete Payment to Generate QR</div>
+            <div class="payment-form">
+                <div class="price-display">
+                    <small>Total Amount</small><br>
+                    <i class="fas fa-rupee-sign"></i> ${pendingAmount} <small>for ${pendingDuration} hour(s)</small>
+                </div>
+                
+                <div class="input-group"><label><i class="fas fa-car"></i> VEHICLE</label><input type="text" class="payment-input" id="paymentVehicle" value="${escapeHtml(pendingVehicle)}" readonly style="background:#f9f3ec;"></div>
+                
+                <div class="payment-methods">
+                    <div class="payment-method ${selectedPaymentMethod === 'card' ? 'selected' : ''}" data-method="card">
+                        <i class="fab fa-cc-visa"></i>
+                        <span>Card</span>
+                    </div>
+                    <div class="payment-method ${selectedPaymentMethod === 'upi' ? 'selected' : ''}" data-method="upi">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>UPI</span>
+                    </div>
+                    <div class="payment-method ${selectedPaymentMethod === 'netbanking' ? 'selected' : ''}" data-method="netbanking">
+                        <i class="fas fa-university"></i>
+                        <span>Net Banking</span>
+                    </div>
+                </div>
+                
+                <div id="cardDetails" style="${selectedPaymentMethod === 'card' ? 'display:block;' : 'display:none;'}">
+                    <div class="input-group"><label><i class="fas fa-credit-card"></i> Card Number</label><input type="text" class="payment-input" id="cardNumber" placeholder="1234 5678 9012 3456"></div>
+                    <div style="display:flex; gap:1rem;">
+                        <div class="input-group" style="flex:1;"><label>MM/YY</label><input type="text" class="payment-input" id="cardExpiry" placeholder="12/28"></div>
+                        <div class="input-group" style="flex:1;"><label>CVV</label><input type="password" class="payment-input" id="cardCvv" placeholder="123"></div>
+                    </div>
+                </div>
+                
+                <div id="upiDetails" style="${selectedPaymentMethod === 'upi' ? 'display:block;' : 'display:none;'}">
+                    <div class="input-group"><label><i class="fas fa-qrcode"></i> UPI ID</label><input type="text" class="payment-input" id="upiId" placeholder="yourname@okhdfcbank"></div>
+                </div>
+                
+                <div id="netbankingDetails" style="${selectedPaymentMethod === 'netbanking' ? 'display:block;' : 'display:none;'}">
+                    <div class="input-group"><label><i class="fas fa-university"></i> Select Bank</label>
+                        <select class="payment-input" id="bankSelect">
+                            <option>SBI</option>
+                            <option>HDFC Bank</option>
+                            <option>ICICI Bank</option>
+                            <option>Axis Bank</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="qr-button" id="payNowBtn"><i class="fas fa-lock"></i> Pay ₹${pendingAmount} & Generate QR</button>
+                <button class="qr-button exit-button" id="cancelPaymentBtn" style="margin-top:10px; background:#c6865e;"><i class="fas fa-arrow-left"></i> Cancel</button>
+                <div id="paymentMsg" style="margin-top:12px; text-align:center;"></div>
+            </div>
+        `;
+        
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                const methodVal = method.getAttribute('data-method');
+                selectedPaymentMethod = methodVal;
+                renderPaymentPage(container);
+            });
+        });
+        
+        const payBtn = document.getElementById('payNowBtn');
+        const cancelBtn = document.getElementById('cancelPaymentBtn');
+        
+        if (payBtn) {
+            payBtn.addEventListener('click', async () => {
+                const msgDiv = document.getElementById('paymentMsg');
+                msgDiv.innerHTML = '<div style="color:#D2A679;"><i class="fas fa-spinner fa-pulse"></i> Processing payment...</div>';
+                
+                // Simulate payment
+                await new Promise(r => setTimeout(r, 1200));
+                
+                const result = startParking(pendingVehicle, pendingAmount);
+                if (result.success) {
+                    msgDiv.innerHTML = `<div style="color:#2E8B57;">✅ ${result.msg}</div>`;
+                    showPaymentPage = false;
+                    pendingVehicle = '';
+                    setTimeout(() => renderFullApp(), 1500);
+                } else {
+                    msgDiv.innerHTML = `<div style="color:#c6865e;">❌ ${result.msg}</div>`;
+                }
+            });
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                showPaymentPage = false;
+                pendingVehicle = '';
+                renderFullApp();
+            });
+        }
+    }
+
+    function renderAdminPanel(container) {
+        const { sessions, reservations: allReservations } = getAllAdminData();
+        const activeSessions = sessions.filter(s => s.status === 'active');
+        const totalEarnings = sessions.filter(s => s.paid).reduce((sum, s) => sum + (s.amount || 40), 0);
+        
+        if (currentTab === 'park') {
+            container.innerHTML = `
+                <div class="admin-view">
+                    <div style="font-weight:700; margin-bottom:0.8rem;"><i class="fas fa-chart-line"></i> Admin Dashboard</div>
+                    <div style="background:#fff5ec; border-radius:1rem; padding:0.8rem; margin-bottom:1rem; text-align:center;">
+                        <i class="fas fa-rupee-sign"></i> Total Earnings: <strong>₹${totalEarnings}</strong>
+                    </div>
+                    <div class="history-list"><div><i class="fas fa-traffic-light"></i> <strong>Active (${activeSessions.length})</strong></div>
+                        ${activeSessions.length === 0 ? '<div class="empty-msg">✨ No active vehicles</div>' : activeSessions.map(s => `<div class="history-item"><span><i class="fas fa-car"></i> ${escapeHtml(s.vehicleNumber)}<br><span style="font-size:0.7rem;">Paid: ₹${s.amount}</span></span><button class="delete-reserve" data-admin-exit="${s.vehicleNumber}"><i class="fas fa-door-open"></i> Exit</button></div>`).join('')}
+                        <hr><div><strong>📋 All sessions</strong></div>
+                        ${sessions.map(s => `<div class="history-item"><span>${escapeHtml(s.vehicleNumber)} | ${escapeHtml(s.entryTime)}</span><span class="badge-status">${s.status} | ₹${s.amount || 40}</span></div>`).join('')}
+                    </div>
+                </div>
+            `;
+            document.querySelectorAll('[data-admin-exit]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const vehicle = btn.getAttribute('data-admin-exit');
+                    if (vehicle && confirm(`Exit ${vehicle}?`)) { exitParking(vehicle); renderFullApp(); }
+                });
+            });
+        } 
+        else if (currentTab === 'reserve') {
+            container.innerHTML = `<div class="admin-view"><div style="font-weight:700;"><i class="fas fa-list-ul"></i> Manage reservations</div><div class="history-list" id="adminReserveList"></div></div>`;
+            const listDiv = document.getElementById('adminReserveList');
+            if (listDiv) {
+                if (allReservations.length === 0) listDiv.innerHTML = '<div class="empty-msg">No reservations</div>';
+                else {
+                    listDiv.innerHTML = allReservations.map(r => `<div class="history-item"><div><strong>${escapeHtml(r.vehicleNumber)}</strong><br>${escapeHtml(r.reserveTime)}<br><span class="badge-status">${escapeHtml(r.slot)}</span></div><button class="delete-reserve" data-admin-res-id="${r.id}"><i class="fas fa-ban"></i> Cancel</button></div>`).join('');
+                    document.querySelectorAll('[data-admin-res-id]').forEach(btn => { btn.addEventListener('click', () => { const id = btn.getAttribute('data-admin-res-id'); if(id && cancelReservation(id)) renderFullApp(); }); });
+                }
+            }
+        }
+        else if (currentTab === 'history') {
+            container.innerHTML = `<div class="admin-view"><div style="font-weight:700;"><i class="fas fa-chart-line"></i> Full history</div>
+                <div class="history-list"><div><strong>Parking (${sessions.length} records)</strong></div>${sessions.map(s => `<div class="history-item"><span>${escapeHtml(s.vehicleNumber)} | ${escapeHtml(s.entryTime)}</span><span>₹${s.amount || 40} | ${s.status}</span></div>`).join('')}</div>
+                <div class="history-list" style="margin-top:1rem;"><div><strong>Reservations</strong></div>${allReservations.map(r => `<div class="history-item"><span>${escapeHtml(r.vehicleNumber)}</span><span>${escapeHtml(r.reserveTime)} (${escapeHtml(r.slot)})</span></div>`).join('') || '<div class="empty-msg">—</div>'}</div>
+            </div>`;
+        }
+    }
+
+    initData();
+    renderFullApp();
+</script>
+</body>
+</html>
